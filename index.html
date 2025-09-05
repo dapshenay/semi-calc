@@ -1,17 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор интеграла Ферми</title>
-    <div> \[ F(y) = \int_0^{\infty}{f_0(x-y) x^r dx \] </div>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 400px;
+            max-width: 600px;
             margin: 50px auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -24,7 +20,7 @@
         }
         input, button {
             padding: 10px;
-            margin: 5px 0;
+            margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
             width: 100%;
@@ -37,12 +33,9 @@
             cursor: pointer;
             font-weight: bold;
         }
-        button:hover {
-            background-color: #005a9e;
-        }
         .result {
             margin-top: 15px;
-            padding: 10px;
+            padding: 15px;
             background-color: #e8f5e8;
             border-radius: 5px;
             border-left: 4px solid #4caf50;
@@ -50,14 +43,11 @@
     </style>
 </head>
 <body>
+    <div id="markdown-content"></div>
+    
     <div class="calculator">
-        <h2>Калькулятор квадрата числа</h2>
-        
-        <label for="inputY">Введите число y:</label>
-        <input type="number" id="inputY" placeholder="Введите число" step="any">
-        
+        <input type="number" id="inputY" placeholder="Введите число y" step="any">
         <button onclick="calculateSquare()">Вычислить квадрат</button>
-        
         <div class="result">
             <strong>Результат:</strong>
             <span id="result">—</span>
@@ -65,24 +55,40 @@
     </div>
 
     <script>
+        // Рендерим Markdown с формулами
+        const markdownText = `
+# Математический калькулятор
+
+## Формула расчета
+
+Мы вычисляем квадрат числа по формуле:
+\\[y^2 = y \\times y\\]
+
+Где:
+- \\(y\\) - входное число
+- \\(y^2\\) - результат (квадрат числа)
+        `;
+
+        document.getElementById('markdown-content').innerHTML = marked.parse(markdownText);
+
+        // Функция калькулятора
         function calculateSquare() {
-            // Получаем значение из input
             const y = parseFloat(document.getElementById('inputY').value);
             
-            // Проверяем, что введено число
             if (isNaN(y)) {
-                document.getElementById('result').textContent = 'Пожалуйста, введите число!';
+                document.getElementById('result').innerHTML = 'Пожалуйста, введите число!';
                 return;
             }
             
-            // Вычисляем квадрат
             const square = y * y;
+            document.getElementById('result').innerHTML = 
+                `\\(${y}^2 = ${square}\\)`;
             
-            // Выводим результат
-            document.getElementById('result').textContent = `${y}² = ${square}`;
+            // Обновляем MathJax для новой формулы
+            MathJax.typeset();
         }
 
-        // Добавляем обработчик нажатия Enter
+        // Обработчик Enter
         document.getElementById('inputY').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 calculateSquare();

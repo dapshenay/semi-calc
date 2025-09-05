@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор квадрата числа</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Калькулятор квадрата числа</h2>
+        
+        <label for="inputY">Введите число y:</label>
+        <input type="number" id="inputY" placeholder="Введите число" step="any">
+        
+        <button onclick="calculateSquare()">Вычислить квадрат</button>
+        
+        <div class="result">
+            <strong>Результат:</strong>
+            <span id="result">—</span>
+        </div>
+    </div>
+
+    <script>
+        function calculateSquare() {
+            // Получаем значение из input
+            const y = parseFloat(document.getElementById('inputY').value);
+            
+            // Проверяем, что введено число
+            if (isNaN(y)) {
+                document.getElementById('result').textContent = 'Пожалуйста, введите число!';
+                return;
+            }
+            
+            // Вычисляем квадрат
+            const square = y * y;
+            
+            // Выводим результат
+            document.getElementById('result').textContent = `${y}² = ${square}`;
+        }
+
+        // Добавляем обработчик нажатия Enter
+        document.getElementById('inputY').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateSquare();
+            }
+        });
+    </script>
+</body>
+</html>

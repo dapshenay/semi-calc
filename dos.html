@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Физика полупроводников. Плотность состояний.</title>
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключаем библиотеку Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Подключаем Math.js для парсинга формул -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js"></script>
+    <!-- Подключаем MathJax для отображения формул в LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <!-- Подключаем наш JavaScript -->
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1> Плотность состояний </h1>
+        <div class="info-area">
+        \( g(\epsilon) = 4 \pi \frac{(2 m)^{3/2}}{(2 \pi \hbar)^3} \sqrt{\epsilon} \)
+        <div class="input-area">
+            <label for="dos_expression"> Формула для плотности состояний (по-умолчанию в \(10^{22} \mathrm{eV}^{-1} \mathrm{cm}^{-3}\) ).</label>
+            <input type="text" id="dos_expression" value="4*pi*(2 * 1.0*m0)^(3/2) / (2*pi*hbar)^3 * (E*eV)^(1/2) / (1e22/(eV*cm^3))" placeholder="функция плотности состояний">
+
+            <label for="input_E">Значение энергии для расчета в точке (E, eV):</label>
+            <input type="number" id="input_E" value="0.1" step="0.1">
+            <button onclick="calculate_dos()">Рассчитать при заданной энергии</button>
+            <div class="result">
+                <strong>Результат:</strong>
+                <span id="result">—</span>
+            </div>
+            <script>
+                function calculate_dos() {
+                    const expression = document.getElementById('dos_expression').value;
+                    const E = parseFloat(document.getElementById('input_E').value);
+                    const result = math.evaluate(expression, {E: E});
+                    document.getElementById('result').textContent = result.toFixed(6);
+                }
+            </script>
+            
+            <label for="start_E">Начальная энергия для графика (eV):</label>
+            <input type="number" id="start_E" value="0" step="0.1">
+            
+            <label for="end_E">Конечная энергия для графика (eV):</label>
+            <input type="number" id="end_E" value="0.5" step="0.1">
+
+            <label for="step_E">Шаг по энергии для графика (eV):</label>
+            <input type="number" id="step_E" value="0.02" step="0.01">
+            
+            <button onclick="plot()">Построить график</button>
+        </div>
+
+        <div class="output-area">
+            <h2>График</h2>
+            <!-- Canvas - холст, на котором Chart.js будет рисовать график -->
+            <canvas id="myChart"></canvas>
+        </div>
+        <script>
+            function plot() {
+                // 1. Получаем значения из полей ввода
+                const functionString = document.getElementById('dos_expression').value;
+                const start_E = parseFloat(document.getElementById('start_E').value);
+                const end_E = parseFloat(document.getElementById('end_E').value);
+
+                // 2. Подготовка данных для графика
+                const step = parseFloat(document.getElementById('step_E').value);
+                const labels = []; // Подписи по оси X (массив чисел)
+                const data = [];   // Значения по оси Y (массив результатов вычисления функции)
+
+                // 3. Проходим по всем точкам и вычисляем значение функции
+                const compiledFunction = math.compile(functionString);
+                for (let E = start_E; E <= end_E; E += step) {
+                    try {
+                        // Используем math.js для вычисления выражения.
+                        // Заменяем 'E' в строке на текущее числовое значение.
+                        // Компилируем выражение для скорости, если вычисляем много раз.
+
+                        const scope = { E: E }; // Создаем область видимости, где переменная 'E' имеет значение
+                        const y = compiledFunction.evaluate(scope);
+
+                        // Добавляем точку в данные для графика
+                        labels.push(E.toFixed(2)); // Округляем для красоты
+                        data.push(y);
+                    } catch (error) {
+                        console.error("Ошибка при вычислении формулы:", error);
+                        alert("Ошибка в формуле! Проверьте правильность написания. Используйте 'E' как переменную.");
+                        return; // Выходим из функции если ошибка
+                    }
+                }
+
+                // 4. Строим или обновляем график
+                const ctx = document.getElementById('myChart').getContext('2d');
+
+                if (myChart) {
+                    // Если график уже существует, обновляем его данные
+                    myChart.data.labels = labels;
+                    myChart.data.datasets[0].data = data;
+                    myChart.data.datasets[0].label = `y = ${functionString}`;
+                    myChart.update(); // Метод Chart.js для перерисовки
+                } else {
+                    // Если графика нет, создаем новый
+                    myChart = new Chart(ctx, {
+                        type: 'line', // Тип графика - линейный
+                        data: {
+                            labels: labels, // Значения X
+                            datasets: [{
+                                label: `y = ${functionString}`, // Подпись графика
+                                data: data, // Значения Y
+                                borderColor: 'rgb(75, 192, 192)', // Цвет линии
+                                tension: 0.1 // Сглаживание кривой
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: false
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        </script>
+    </div>
+
+
+</body>
+</html>

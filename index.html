@@ -1,171 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .calculator {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        input, button {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007acc;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .result {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #e8f5e8;
-            border-radius: 5px;
-            border-left: 4px solid #4caf50;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Физика полупроводников</title>
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключаем библиотеку Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Подключаем Math.js для парсинга формул -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js"></script>
+    <!-- Подключаем MathJax для отображения формул в LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
-    <h2>Калькулятор интеграла Ферми от \(f_0(x, y)\)</h2>
-    <p>\(\mathscr{F}_r(y) = \int_0^{\infty} f_0(x, y) x^r dx\), где функции распределения Ферми \(f_0(x, y) = \frac{1}{e^{x-y} + 1}\)</p>
-    
-    <div class="calculator">
-        <input type="number" id="Fermi_f0_input_y" placeholder="Химпотенциал y">
-        <input type="number" id="Fermi_f0_input_r" placeholder="Показатель степени r">
-        <button onclick="calculate_fermi_f0()">Вычислить интеграл Ферми</button>
-        <div class="result">
-            <strong>Результат:</strong>
-            <span id="result_Fermi_f0">—</span>
-        </div>
-    </div>
-
-    <h2>Калькулятор интеграла Ферми от производной \(-\partial_x f_0(x, y)\)</h2>
-    <p>\(F_r(y) = \int_0^{\infty} \left( - \frac{\partial f_0(x, y)}{\partial x} \right) x^r dx\)</p>
-
-    <div class="calculator">
-        <input type="number" id="Fermi_minus_df0_input_y" placeholder="Химпотенциал y">
-        <input type="number" id="Fermi_minus_df0_input_r" placeholder="Показатель степени r">
-        <button onclick="calculate_fermi_minus_df0()">Вычислить интеграл Ферми</button>
-        <div class="result">
-            <strong>Результат:</strong>
-            <span id="result_Fermi_minus_df0">—</span>
-        </div>
-    </div>
-
-    <script>
-
-        // Обработчик Enter
-        document.getElementById('input_y').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                calculate_fermi_f0();
-            }
-        });
-
-        // Функция калькулятора
-        function calculate_fermi_f0() {
-            const y = parseFloat(document.getElementById('Fermi_f0_input_y').value);
-            const r = parseFloat(document.getElementById('Fermi_f0_input_r').value);
-
-            if (isNaN(y) || isNaN(r)) {
-                document.getElementById('result_Fermi_f0').innerHTML = 'Пожалуйста, введите число!';
-                return;
-            }
-
-            //const res = y ** r;
-
-            // Создаем функцию из строки
-            const f = new Function('x', `return x**(${r})/(Math.exp(x-(${y}))+1)`);
-
-            // Используем численные методы
-            const res = integrateQuadrature(f, 0, Math.max(50, y+50) );
-
-
-            document.getElementById('result_Fermi_f0').innerHTML =
-                `\\(\\mathscr{F}_{${r}}(${y}) = ${res}\\)`;
-
-            // Обновляем MathJax для новой формулы
-            MathJax.typeset();
-        }
-
-        // Функция калькулятора
-        function calculate_fermi_minus_df0() {
-            const y = parseFloat(document.getElementById('Fermi_minus_df0_input_y').value);
-            const r = parseFloat(document.getElementById('Fermi_minus_df0_input_r').value);
-
-            if (isNaN(y) || isNaN(r)) {
-                document.getElementById('result_Fermi_minus_df0').innerHTML = 'Пожалуйста, введите число!';
-                return;
-            }
-
-            // Создаем функцию из строки
-            const f = new Function('x', `return x**(${r})/(4 * Math.cosh((x-(${y}))/2)**2 )`);
-
-            //const f = new Function('x', `return x**(${r}) * Math.exp(x-(${y}))/(Math.exp(x-(${y}))+1)**2 `);
-
-            // Используем численные методы
-            const res = integrateQuadrature(f, 0, Math.max(50, y+50) );
-
-
-            document.getElementById('result_Fermi_minus_df0').innerHTML =
-                `\\(F_{${r}}(${y}) = ${res}\\)`;
-
-            // Обновляем MathJax для новой формулы
-            MathJax.typeset();
-        }
-
-        // Адаптивная квадратура (аналог scipy.integrate.quad)
-        function integrateQuadrature(f, a, b, tolerance = 1e-6) {
-            return adaptiveSimpson(f, a, b, tolerance);
-        }
-
-        function adaptiveSimpson(f, a, b, tolerance) {
-            const h = (b - a) / 2;
-            const c = (a + b) / 2;
-
-            const fa = f(a);
-            const fc = f(c);
-            const fb = f(b);
-
-            const S = (h / 3) * (fa + 4 * fc + fb);
-
-            return adaptiveSimpsonRecursive(f, a, b, S, fa, fb, fc, tolerance);
-        }
-
-        function adaptiveSimpsonRecursive(f, a, b, S, fa, fb, fc, tolerance) {
-            const c = (a + b) / 2;
-            const h = (b - a) / 2;
-            const d = (a + c) / 2;
-            const e = (c + b) / 2;
-
-            const fd = f(d);
-            const fe = f(e);
-
-            const Sleft = (h / 6) * (fa + 4 * fd + fc);
-            const Sright = (h / 6) * (fc + 4 * fe + fb);
-            const S2 = Sleft + Sright;
-
-            if (Math.abs(S2 - S) <= 15 * tolerance) {
-                return S2 + (S2 - S) / 15;
-            }
-
-            return adaptiveSimpsonRecursive(f, a, c, Sleft, fa, fc, fd, tolerance/2) +
-                   adaptiveSimpsonRecursive(f, c, b, Sright, fc, fb, fe, tolerance/2);
-        }
-    </script>
+    <h1>Материалы к решению задач по физике полупроводников.</h1>
+    <ul>
+    <item> <a href="dos.html">Плотность состояний</a> </item>
+    <item> <a href="help.html">Справка</a> </item>
+    </ul>
 </body>
 </html>

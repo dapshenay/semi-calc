@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Физика полупроводников. Справка</title>
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Подключаем библиотеку Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Подключаем Math.js для парсинга формул -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js"></script>
+    <!-- Подключаем MathJax для отображения формул в LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <!-- Подключаем наш JavaScript -->
+    <script src="script.js"></script>
+    <style>
+        .constants-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+        .constants-table th {
+            background-color: #007acc;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .constants-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .constants-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .constants-table tr:hover {
+            background-color: #f0f8ff;
+        }
+        .constant-name {
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #2c3e50;
+        }
+        .constant-value {
+            font-family: 'Courier New', monospace;
+            color: #2980b9;
+        }
+        .constant-description {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+
+<body>
+<h1> Физические константы. </h1>
+<div id="const_help"></div>
+<script>
+    // Функция для создания таблицы констант
+    function createConstantsTable(constantsObj, descriptions = {}) {
+        let tableHTML = `
+            <table class="constants-table">
+                <thead>
+                    <tr>
+                        <th>Константа</th>
+                        <th>Значение</th>
+                        <th>Описание</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        // Сортируем константы по имени
+        const sortedConstants = Object.entries(constantsObj)
+        //    .sort(([a], [b]) => a.localeCompare(b));
+
+        for (const [name, value] of sortedConstants) {
+            const description = descriptions[name] || "—";
+            const formattedValue = formatScientific(value);
+
+            tableHTML += `
+                <tr>
+                    <td class="constant-name">${name}</td>
+                    <td class="constant-value">${formattedValue}</td>
+                    <td class="constant-description">${description}</td>
+                </tr>
+            `;
+        }
+
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+
+        return tableHTML;
+    }
+
+    // Функция для форматирования чисел в научной нотации
+    function formatScientific(value) {
+        if (Math.abs(value) < 1e-4 || Math.abs(value) > 1e4) {
+            return value.toExponential(3);
+        } else {
+            return value.toString();
+        }
+    }
+    // Создаем и вставляем таблицу
+    document.getElementById('const_help').innerHTML = createConstantsTable(CGS, constantDescriptions);
+</script>
+</body>
+</html>
